@@ -62,7 +62,7 @@ instance Expr Mod7 where
 -- we write intances of Expr typeclass and can check the validity using testExp
 
 testExp :: Expr a => Maybe a
-testExp = parseExp lit add mul "(3*-4) + 5"
+testExp = parseExp lit add mul "(1+(-2)) * 3"
 
 testInteger :: Maybe Integer
 testInteger = testExp
