@@ -10,7 +10,7 @@ import           Data.Maybe
 
 -- ExprT.Add and StackVM.Add is uses to prevent compiler ambiguity as both modules expose same type constructor
 -- FlexibleInstances allow things instance Expr StackVM.Program where without having typevariables a1,a2, like in T (a1,a2 ..)
--- it also allows us to have make instances of type synonyms like StackVM.Program
+-- it also allows us to make instances of type synonyms like StackVM.Program
 
 eval :: ExprT -> Integer
 eval (Lit a        ) = a
