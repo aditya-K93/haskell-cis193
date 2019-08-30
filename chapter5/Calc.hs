@@ -120,4 +120,4 @@ withVars
     :: [(String, Integer)]
     -> (M.Map String Integer -> Maybe Integer)
     -> Maybe Integer
-withVars m f = f $ M.fromList m
+withVars m f = f . M.fromList $ m
