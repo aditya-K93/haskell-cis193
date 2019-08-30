@@ -7,13 +7,14 @@ import           ExprT
 import           Parser
 import           StackVM
 import           Data.Maybe
+import qualified Data.Map                      as M
 
 -- ExprT.Add and StackVM.Add is uses to prevent compiler ambiguity as both modules expose same type constructor
 -- FlexibleInstances allow things instance Expr StackVM.Program where without having typevariables a1,a2, like in T (a1,a2 ..)
 -- it also allows us to make instances of type synonyms like StackVM.Program
 
 eval :: ExprT -> Integer
-eval (Lit a        ) = a
+eval (ExprT.Lit a  ) = a
 eval (ExprT.Mul x y) = eval x * eval y
 eval (ExprT.Add x y) = eval x + eval y
 
@@ -26,7 +27,7 @@ class Expr a where
     mul :: a -> a ->  a
 
 instance Expr ExprT where
-    lit = Lit
+    lit = ExprT.Lit
     add = ExprT.Add
     mul = ExprT.Mul
 
@@ -94,4 +95,29 @@ compile = parseExp lit add mul
 runProgram :: String -> Either String StackVal
 runProgram = stackVM . fromMaybe [] . compile
 
+class HasVars a where
+    var :: String -> a
 
+data VarExprT = VarExprT String Integer deriving (Show, Eq)
+
+instance HasVars VarExprT where
+    var s = VarExprT s 0
+
+instance Expr VarExprT where
+    lit = VarExprT ""
+    add (VarExprT _ x) (VarExprT _ y) = VarExprT "" (x + y)
+    mul (VarExprT _ x) (VarExprT _ y) = VarExprT "" (x * y)
+
+instance HasVars (M.Map String Integer -> Maybe Integer) where
+    var = M.lookup
+
+instance Expr (M.Map String Integer -> Maybe Integer) where
+    lit x _ = Just x
+    add f g m = (+) <$> f m <*> g m
+    mul f g m = (*) <$> f m <*> g m
+
+withVars
+    :: [(String, Integer)]
+    -> (M.Map String Integer -> Maybe Integer)
+    -> Maybe Integer
+withVars m f = f $ M.fromList m
